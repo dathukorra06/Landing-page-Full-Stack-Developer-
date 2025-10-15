@@ -1,0 +1,9 @@
+flask
+flask-cors
+pymongo
+python-dotenv
+boto3
+werkzeug
+Pillow
+
+# note: ffmpeg is an external binary and must be installed separately on the host

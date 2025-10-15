@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:6.0
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      - MONGO_URI=mongodb+srv://dathukorra:loading@cluster0.7z6n4fy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+      - DB_NAME=rtsp_overlay_demo
+      - HLS_FOLDER=static/hls
+      - UPLOAD_FOLDER=static/uploads
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend/static/hls:./static/hls
+      - ./backend/static/uploads:./static/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+
+volumes:
+  mongo_data:
